@@ -141,13 +141,11 @@ async function getBrowseShopsReward() {
 	
 	var times = 0;
 	while ((await request(arguments.callee.name.toString())).resultCode === '0' && times < 5){
-		console.log('第'+times+'次浏览完成');
+		console.log('第'+times+'次店铺浏览完成');
 		times ++;
 	}
 	
-	console.log(arguments.callee.name.toString());
-	let response = await request(arguments.callee.name.toString());
-	console.log('浏览店铺任务' + response.message);
+	console.log('浏览店铺任务结束');
 	return;
 }
 
@@ -179,7 +177,7 @@ async function feedPets() {
 	console.log(arguments.callee.name.toString());
 
 	let response = await request(arguments.callee.name.toString());
-	console.log(response);
+	// console.log(response);
 	return response;
 }
 
@@ -188,7 +186,7 @@ async function initPetTown() {
 	console.log(arguments.callee.name.toString());
 
 	let response = await request(arguments.callee.name.toString());
-	console.log(response);
+	// console.log(response);
 	
 	if (response.code === '0' && response.resultCode === '0' && response.message === 'success') {
 		return response.result;
@@ -208,7 +206,7 @@ async function inviteFriendsInit() {
 async function taskInit() {
 	console.log(arguments.callee.name.toString());
 	let response = await request(arguments.callee.name.toString());
-	console.log(response);
+	// console.log(response);
 	return response.result;
 }
 
