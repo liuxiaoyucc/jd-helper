@@ -138,6 +138,13 @@ async function getSportReward() {
 
 // 浏览店铺任务, 任务可能为多个? 目前只有一个
 async function getBrowseShopsReward() {
+	
+	var times = 0;
+	while ((await request(arguments.callee.name.toString())).resultCode === '0' && times < 5){
+		console.log('第'+times+'次浏览完成');
+		times ++;
+	}
+	
 	console.log(arguments.callee.name.toString());
 	let response = await request(arguments.callee.name.toString());
 	console.log('浏览店铺任务' + response.message);
