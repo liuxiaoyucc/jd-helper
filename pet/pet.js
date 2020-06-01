@@ -132,7 +132,7 @@ async function getSportReward() {
 	
 	console.log('领取遛狗奖励');
 	let response = await request(arguments.callee.name.toString());
-	console.log(response);
+	// console.log(response);
 	return;
 }
 
