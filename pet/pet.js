@@ -1,24 +1,29 @@
 var JD_HOST = "https://api.m.jd.com/client.action?";
 
+//按顺序执行, 尽量先执行不消耗狗粮的任务, 避免中途狗粮不够, 而任务还没做完
 var function_map = {
-	threeMealInit:  getThreeMealReward, //三餐
 	signInit:  getSignReward, //每日签到
-	firstFeedInit:  firstFeedInit, //首次喂食
+	threeMealInit:  getThreeMealReward, //三餐
 	browseSingleShopInit:  getSingleShopReward, //浏览店铺
 	browseShopsInit:  getBrowseShopsReward, //浏览店铺s, 目前只有一个店铺
-	feedReachInit:  feedReachInit, //喂食10次任务
-	
+	firstFeedInit:  firstFeedInit, //首次喂食
 	inviteFriendsInit:  inviteFriendsInit, //邀请好友, 暂未处理
+	
+	feedReachInit:  feedReachInit, //喂食10次任务  最后执行投食10次任务, 提示剩余狗粮是否够投食10次完成任务, 并询问要不要继续执行
 };
+
 
 async function taskEntrance() {
 	console.log('entrance');
 	console.log('任务开始');
-
-	let task = await taskInit();
-	let task_list = task.taskList;
+	//先开始遛狗, 收集狗粮
+	await petSport();
 	
-	for (let task_name of task_list) {
+	let task = await taskInit();
+	
+	// let task_list = task.taskList;
+	
+	for (let task_name in function_map) {
 		if (!task[task_name].finished) {
 			console.log('任务' + task_name + '开始');
 			await function_map[task_name](); 
@@ -27,8 +32,7 @@ async function taskEntrance() {
 		}
 	}
 	
-	//任务列表中的完成后, 开始遛狗
-	await petSport();
+
 	await energyCollect();
 	console.log('所有任务结束');
 };
@@ -56,18 +60,40 @@ async function firstFeedInit() {
  */
 async function feedReachInit() {
 	
+	let task = await taskInit();
+	if (task.feedReachInit.finished) {
+		console.log('今天喂食10次任务已完成');
+		return;
+	}
+	
+	let pet_info = await initPetTown();
+	
+	let food_amount = pet_info.foodAmount; //剩余狗粮
+	let reach_feed_times = task.feedReachInit.hadFeedAmount / 10; //已经喂养了几次
+	let need_times = 10 - reach_feed_times; //还需要几次
+	let can_feed_times = food_amount / 10;
+	if (can_feed_times < need_times) {
+		if(confirm('当前剩余狗粮'+food_amount+'g, 已不足投食'+ need_times + '次, 确定要继续吗?') === false){
+			console.log('拒绝执行喂养十次任务');
+			return;
+		}
+	}
+	
+	
 	let function_id = arguments.callee.name.toString();
 	for (var i = 0; i < 10; i++) {
 		
-		let task = await taskInit();
-		if (task.feedReachInit.finished) {
-			console.log('今天喂食10次任务已完成');
-			break;
-		}
+		
+		
 		
 		let response = await feedPets();
 		
 		if (response.code === '0' && response.message === "success" && response.resultCode === '0') { //单次浇水成功
+			let temp_task = await taskInit();
+			if (temp_task.feedReachInit.finished) {
+				console.log('今天喂食10次任务已完成');
+				break;
+			}
 			continue;
 		}
 		console.log('喂食10次任务已完成');
@@ -128,6 +154,7 @@ async function getSingleShopReward() {
 
 // 三餐签到, 每天三段签到时间
 async function getThreeMealReward() {
+
 	console.log(arguments.callee.name.toString());
 	let response = await request(arguments.callee.name.toString());
 	console.log('三餐签到' + response.message);
@@ -147,6 +174,20 @@ async function feedPets() {
 	let response = await request(arguments.callee.name.toString());
 	console.log(response);
 	return response;
+}
+
+//查询jd宠物信息
+async function initPetTown() {
+	console.log(arguments.callee.name.toString());
+
+	let response = await request(arguments.callee.name.toString());
+	console.log(response);
+	
+	if (response.code === '0' && response.resultCode === '0' && response.message === 'success') {
+		return response.result;
+	}else {
+		console.log(response);
+	}
 }
 
 // 邀请好友
