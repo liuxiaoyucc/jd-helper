@@ -20,7 +20,9 @@ async function taskEntrance() {
 	await petSport();
 	
 	let task = await taskInit();
-	
+	if (!task) {
+		return false;
+	}
 	// let task_list = task.taskList;
 	
 	for (let task_name in function_map) {
@@ -206,6 +208,11 @@ async function inviteFriendsInit() {
 async function taskInit() {
 	console.log(arguments.callee.name.toString());
 	let response = await request(arguments.callee.name.toString());
+	//{code: "0", resultCode: "9999", message: "内部异常"}
+	if (response.resultCode === '9999' || !response.result) {
+		console.log('初始化任务异常, 请稍后再试');
+		return false;
+	}
 	// console.log(response);
 	return response.result;
 }
