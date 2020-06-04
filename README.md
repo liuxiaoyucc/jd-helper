@@ -41,7 +41,7 @@ __建议使用Chrome浏览器__
 
 	![image-20200604235943453](https://ccliuxy-image.oss-cn-beijing.aliyuncs.com/image-20200604235943453.png)
 
-## 重要
+## 声明
 
 __本项目仅限学习交流使用,  不得用于商业用途或非法牟利, 产生一切不当后果与原作者无关__
 
