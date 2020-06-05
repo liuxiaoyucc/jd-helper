@@ -18,7 +18,7 @@ async function taskEntrance() {
 	console.log('任务开始');
 	//先开始遛狗, 收集狗粮
 	await petSport();
-	await slaveHelp(); //如果没有要助力的好友, 请把这一行注释掉
+	// await slaveHelp(); //如果需要完成助力好友任务, 请把这一行打开,并且在slaveHelp方法中修改shareCode
 	let task = await taskInit();
 	if (!task) {
 		return false;
@@ -130,10 +130,15 @@ async function petSport() {
 	
 	return;
 }
+
+/**
+ * 助力好友, 暂时支持一个好友, 需要拿到shareCode
+ * SHARE_CODE为你要助力的好友的
+ */
 async function slaveHelp() {
 	console.log(arguments.callee.name.toString());
 
-	let response = await request(arguments.callee.name.toString(), {shareCode: 'MTAxODcxOTI2NTAwMDAwMDAwMDc1Nzg0NQ=='}); //这里shareCode替换成你要助力好友的shareCode, 如何获取shareCode我整理后会在readme中讲
+	let response = await request(arguments.callee.name.toString(), {shareCode: SHARE_CODE}); //这里shareCode替换成你要助力好友的shareCode, 如何获取shareCode我整理后会在readme中讲
 	console.log('助理好友结果: ' + response.message);
 	
 	return;
