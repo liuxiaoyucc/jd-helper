@@ -20,11 +20,14 @@
 
 - [x] 10次浇水及奖励领取
 
-- [ ] 助力好友
-需要拿到shareCode, shareCode在初始化农场信息api里面
+- [x] 助力好友
+ __需要拿到shareCode, shareCode现在会在脚本运行时在控制台输出, 可以保存下来__
 
 - [ ] 被好友助力
   
-需要使用好友的cookie
-
+  需要使用好友的cookie
+  
 - [ ] 右上角送水滴part
+
+
+

@@ -16,6 +16,9 @@ var function_map = {
 async function taskEntrance() {
 	console.log('entrance');
 	console.log('任务开始');
+	let pet_info = await initPetTown();
+	console.log('您的shareCode为: ', pet_info.shareCode);
+	
 	//先开始遛狗, 收集狗粮
 	await petSport();
 	// await slaveHelp(); //如果需要完成助力好友任务, 请把这一行打开,并且在slaveHelp方法中修改shareCode
@@ -138,7 +141,7 @@ async function petSport() {
 async function slaveHelp() {
 	console.log(arguments.callee.name.toString());
 
-	let response = await request(arguments.callee.name.toString(), {shareCode: SHARE_CODE}); //这里shareCode替换成你要助力好友的shareCode, 如何获取shareCode我整理后会在readme中讲
+	let response = await request(arguments.callee.name.toString(), {shareCode: SHARE_CODE}); //这里SHARE_CODE替换成你要助力好友的shareCode, 如何获取shareCode我整理后会在readme中讲
 	console.log('助理好友结果: ' + response.message);
 	
 	return;
@@ -220,6 +223,7 @@ async function inviteFriendsInit() {
 	return false;
 }
 
+
 // 可查询任务完成情况
 async function taskInit() {
 	console.log(arguments.callee.name.toString());
@@ -232,6 +236,8 @@ async function taskInit() {
 	// console.log(response);
 	return response.result;
 }
+
+
 
 // 请求
 async function request(function_id, body = {}){
