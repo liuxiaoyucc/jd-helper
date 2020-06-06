@@ -1,5 +1,9 @@
 var JD_HOST = "https://api.m.jd.com/client.action?";
 
+var shareCodes = [ // 这个列表填入你要助力的好友的shareCode, 最多可能是5个? 没有验证过
+	'MTAxODcxOTI2NTAwMDAwMDAwMDc4MDExNw==',
+]
+
 //按顺序执行, 尽量先执行不消耗狗粮的任务, 避免中途狗粮不够, 而任务还没做完
 var function_map = {
 	signInit:  getSignReward, //每日签到
@@ -21,7 +25,7 @@ async function taskEntrance() {
 	
 	//先开始遛狗, 收集狗粮
 	await petSport();
-	// await slaveHelp(); //如果需要完成助力好友任务, 请把这一行打开,并且在slaveHelp方法中修改shareCode
+	await slaveHelp(); //如果需要完成助力好友任务, 请把这一行打开,并且在slaveHelp方法中修改shareCode
 	let task = await taskInit();
 	if (!task) {
 		return false;
@@ -66,7 +70,7 @@ async function firstFeedInit() {
  * 喂食10次 任务
  */
 async function feedReachInit() {
-	
+	console.log('投食任务开始...');
 	let task = await taskInit();
 	if (task.feedReachInit.finished) {
 		console.log('今天喂食10次任务已完成');
@@ -94,8 +98,8 @@ async function feedReachInit() {
 		
 		
 		let response = await feedPets();
-		
-		if (response.code === '0' && response.message === "success" && response.resultCode === '0') { //单次浇水成功
+		console.log('本次投食结果: ', response);
+		if (response.code === '0' && response.message === "success" && response.resultCode === '0') {
 			let temp_task = await taskInit();
 			if (temp_task.feedReachInit.finished) {
 				console.log('今天喂食10次任务已完成');
@@ -103,9 +107,9 @@ async function feedReachInit() {
 			}
 			continue;
 		}
-		console.log('喂食10次任务已完成');
 		break;
 	}
+	console.log('投食10次任务已完成');
 	return;
 }
 
@@ -124,9 +128,11 @@ async function petSport() {
 	console.log(arguments.callee.name.toString());
 
 	var times = 0;
+	
 	while ((await request(arguments.callee.name.toString())).resultCode === '0' && times < 10){
 		console.log('第'+times+'次遛狗完成');
-		await getSportReward();
+		let sportRevardResult = await getSportReward();
+		console.log('领取遛狗奖励结果: ', sportRevardResult);
 		times ++;
 	}
 	console.log('遛狗任务结束');
@@ -136,13 +142,17 @@ async function petSport() {
 
 /**
  * 助力好友, 暂时支持一个好友, 需要拿到shareCode
- * SHARE_CODE为你要助力的好友的
+ * shareCode为你要助力的好友的
+ * 运行脚本时你自己的shareCode会在控制台输出, 可以将其分享给他人
  */
 async function slaveHelp() {
-	console.log(arguments.callee.name.toString());
-
-	let response = await request(arguments.callee.name.toString(), {shareCode: SHARE_CODE}); //这里SHARE_CODE替换成你要助力好友的shareCode, 如何获取shareCode我整理后会在readme中讲
-	console.log('助理好友结果: ' + response.message);
+	
+	let functionId = arguments.callee.name.toString();
+	for (let code of shareCodes) {
+		console.log('开始助力好友: ', code);
+		let response = await request(functionId, {shareCode: code}); 
+		console.log('助理好友结果: ' + response.message);
+	}
 	
 	return;
 }
@@ -151,10 +161,10 @@ async function slaveHelp() {
 // 领取遛狗奖励
 async function getSportReward() {
 	
-	console.log('领取遛狗奖励');
+	
 	let response = await request(arguments.callee.name.toString());
-	// console.log(response);
-	return;
+	
+	return response;
 }
 
 // 浏览店铺任务, 任务可能为多个? 目前只有一个
@@ -204,7 +214,7 @@ async function feedPets() {
 
 //查询jd宠物信息
 async function initPetTown() {
-	console.log(arguments.callee.name.toString());
+	console.log('获取萌宠信息');
 
 	let response = await request(arguments.callee.name.toString());
 	// console.log(response);
@@ -216,17 +226,16 @@ async function initPetTown() {
 	}
 }
 
-// 邀请好友
+// 邀请新用户
 async function inviteFriendsInit() {
 	console.log(arguments.callee.name.toString());
-	console.log('该功能未完成');
+	console.log('邀请新用户功能未完成');
 	return false;
 }
 
 
 // 可查询任务完成情况
 async function taskInit() {
-	console.log(arguments.callee.name.toString());
 	let response = await request(arguments.callee.name.toString());
 	//{code: "0", resultCode: "9999", message: "内部异常"}
 	if (response.resultCode === '9999' || !response.result) {
