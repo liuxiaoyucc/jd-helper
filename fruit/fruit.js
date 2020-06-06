@@ -27,6 +27,7 @@ function* step() {
 	
 	console.log('shareCode为: ' , farmInfo.farmUserPro.shareCode);
 	
+	
 	if (!farmTask.signInit.todaySigned) {
 		let signResult = yield signForFarm(); //签到
 		console.log('签到结果: ' , signResult);
@@ -79,7 +80,16 @@ function* step() {
 	yield browserForTurntableFarm(1);
 	yield browserForTurntableFarm(2);
 	
+	
 	console.log('全部任务结束');
+}
+
+/**
+ * 集卡抽奖
+ */
+function lotteryForTurntableFarm() {
+	
+	request(arguments.callee.name.toString(), {type: 1});
 }
 
 function browserForTurntableFarm(type) {
@@ -149,6 +159,13 @@ function signForFarm() {
 function taskInitForFarm() {
 	let functionId = arguments.callee.name.toString();
 	request(functionId);
+}
+
+/**
+ * 初始化集卡活动信息
+ */
+function initForTurntableFarm() {
+	request(arguments.callee.name.toString());
 }
 
 function sleep(response) {
