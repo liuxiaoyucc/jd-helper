@@ -25,10 +25,15 @@ function* step() {
 	farmInfo = yield initForFarm();
 	console.log('农场初始化数据: ' , farmInfo);
 	
+	console.log('shareCode为: ' , farmInfo.farmUserPro.shareCode);
+	
 	if (!farmTask.signInit.todaySigned) {
 		let signResult = yield signForFarm(); //签到
 		console.log('签到结果: ' , signResult);
 	}
+	
+	// let goalResult = yield gotWaterGoalTaskForFarm();
+	// console.log('被水滴砸中奖励: ', goalResult);
 	
 	let adverts = farmTask.gotBrowseTaskAdInit.userBrowseTaskAds
 	for (let advert of adverts) { //开始浏览广告
@@ -65,17 +70,46 @@ function* step() {
 		let totalWaterReward = yield totalWaterTaskForFarm();
 		console.log('10次浇水奖励领取结果: ', totalWaterReward);
 		
-		console.log('finished');
+		
+		
+		
 	}
 	
+	console.log('finished 水果任务完成!');
+	yield browserForTurntableFarm(1);
+	yield browserForTurntableFarm(2);
 	
-	
+	console.log('全部任务结束');
 }
 
+function browserForTurntableFarm(type) {
+	if (type === 1) {
+		console.log('浏览爆品会场');
+	}
+	if (type === 2) {
+		console.log('领取浏览爆品会场奖励');
+	}
+	
+	request(arguments.callee.name.toString(), {type: type});
+	// 浏览爆品会场8秒
+}
+
+/**
+ * 被水滴砸中
+ * 要弹出来窗口后调用才有效, 暂时不知道如何控制
+ */
+function gotWaterGoalTaskForFarm() {
+	request(arguments.callee.name.toString(), {type: 3});
+}
+
+/**
+ * 10次浇水
+ */
 function totalWaterTaskForFarm() {
 	let functionId = arguments.callee.name.toString();
 	request(functionId);
 }
+
 
 function firstWaterTaskForFarm() {
 	let functionId = arguments.callee.name.toString();
