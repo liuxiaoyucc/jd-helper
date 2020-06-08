@@ -25,8 +25,11 @@ function* step() {
 	farmInfo = yield initForFarm();
 	console.log('农场初始化数据: ' , farmInfo);
 	
-	console.log('shareCode为: ' , farmInfo.farmUserPro.shareCode);
-	
+	if (farmInfo.farmUserPro) {
+		console.log('shareCode为: ' , farmInfo.farmUserPro.shareCode);
+	}else {
+		console.log('初始化农场数据异常, 请登录京东 app查看农场0元水果功能是否正常');
+	}
 	
 	if (!farmTask.signInit.todaySigned) {
 		let signResult = yield signForFarm(); //签到
