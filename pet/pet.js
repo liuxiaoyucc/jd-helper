@@ -92,6 +92,10 @@ async function feedReachInit() {
 		if (response.resultCode == 0 && response.code == 0) {
 			needFeedTimes --;
 		}
+		if (response.resultCode == 3003 && response.code == 0) {
+			console.log('剩余狗粮不足, 投食结束');
+			needFeedTimes = 0;
+		}
 		
 		tryTimes --;
 	} while (needFeedTimes > 0 && tryTimes > 0)
