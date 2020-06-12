@@ -251,7 +251,6 @@ function inviteFriendsInit() {
 	}, 2000);
 }
 
-
 // 初始化任务, 可查询任务完成情况
 function taskInit() {
 	console.log('开始任务初始化');
