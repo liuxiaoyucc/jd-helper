@@ -2,9 +2,12 @@ let JD_FRUIT_HOST = 'https://api.m.jd.com/client.action?';
 let farmTask = null;
 let farmInfo = null;
 
+let shareCodes = [
+	'121ada81cdfd4085b07d1ce871ded341',
+]
+
 function request(function_id, body = {}) {
 	console.log(function_id);
-	
 	fetch(JD_FRUIT_HOST + 'functionId=' + function_id + '&appid=wh5&body=' + JSON.stringify(body), {
 			credentials: "include",
 		})
@@ -12,10 +15,10 @@ function request(function_id, body = {}) {
 			return res.json();
 		})
 		.then((response) => {
+			// console.log(response);
 			sleep(response);
 			
 		});
-
 }
 
 function* step() {
@@ -35,6 +38,8 @@ function* step() {
 		let signResult = yield signForFarm(); //签到
 		console.log('签到结果: ' , signResult);
 	}
+	
+	
 	
 	// let goalResult = yield gotWaterGoalTaskForFarm();
 	// console.log('被水滴砸中奖励: ', goalResult);
@@ -87,6 +92,7 @@ function* step() {
 	console.log('全部任务结束');
 }
 
+
 /**
  * 集卡抽奖
  */
@@ -134,7 +140,7 @@ function firstWaterTaskForFarm() {
  */
 function initForFarm() {
 	let functionId = arguments.callee.name.toString();
-	request(functionId);
+	request(functionId,  {shareCode: shareCodes[0]});
 }
 
 // 浇水动作

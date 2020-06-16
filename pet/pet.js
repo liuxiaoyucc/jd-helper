@@ -152,7 +152,7 @@ async function slaveHelp() {
 		let response = await request(functionId, {
 			shareCode: code
 		});
-		console.log('助理好友结果: ' + response.message);
+		console.log('助力好友结果: ' + response.message);
 	}
 
 	gen.next();
