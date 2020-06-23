@@ -33,7 +33,7 @@ function* entrance() {
 	
 	// 任务开始
 	for (let task_name in function_map) {
-		if (!taskInfo[task_name].finished) {
+		if (taskInfo[task_name] && !taskInfo[task_name].finished) {
 			console.log('任务' + task_name + '开始');
 			yield function_map[task_name]();
 		} else {
