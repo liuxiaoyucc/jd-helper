@@ -33,6 +33,7 @@ function* entrance() {
 	
 	// 任务开始
 	for (let task_name in function_map) {
+		
 		if (taskInfo[task_name] && !taskInfo[task_name].finished) {
 			console.log('任务' + task_name + '开始');
 			yield function_map[task_name]();
@@ -77,31 +78,48 @@ async function feedReachInit() {
 	let finishedTimes = taskInfo.feedReachInit.hadFeedAmount / 10; //已经喂养了几次
 	let needFeedTimes = 10 - finishedTimes; //还需要几次
 	let canFeedTimes = foodAmount / 10;
+	
+	
+	let feedStart = async function() {
+		let tryTimes = 20; //尝试次数
+		do {
+			console.log('还需要投食 '+ needFeedTimes + ' 次');
+			let response = await feedPets();
+			console.log('本次投食结果: ', response);
+			if (response.resultCode == 0 && response.code == 0) {
+				needFeedTimes --;
+			}
+			if (response.resultCode == 3003 && response.code == 0) {
+				console.log('剩余狗粮不足, 投食结束');
+				needFeedTimes = 0;
+			}
+			
+			tryTimes --;
+		} while (needFeedTimes > 0 && tryTimes > 0)
+		
+		console.log('投食任务结束...');
+		gen.next();
+	};
+	
+	
+	
 	if (canFeedTimes < needFeedTimes) {
 		if (confirm('当前剩余狗粮' + foodAmount + 'g, 已不足投食' + needFeedTimes + '次, 确定要继续吗?') === false) {
 			console.log('你拒绝了执行喂养十次任务');
-			gen.next();
+			setTimeout(()=> {
+				gen.next();
+			}, 1000);
+			
+		}else {
+			feedStart();
 		}
+	}else {
+		feedStart();
 	}
 	
-	let tryTimes = 20; //尝试次数
-	do {
-		console.log('还需要投食 '+ needFeedTimes + ' 次');
-		let response = await feedPets();
-		console.log('本次投食结果: ', response);
-		if (response.resultCode == 0 && response.code == 0) {
-			needFeedTimes --;
-		}
-		if (response.resultCode == 3003 && response.code == 0) {
-			console.log('剩余狗粮不足, 投食结束');
-			needFeedTimes = 0;
-		}
-		
-		tryTimes --;
-	} while (needFeedTimes > 0 && tryTimes > 0)
 	
-	console.log('投食任务结束...');
-	gen.next();
+	
+	
 
 }
 
