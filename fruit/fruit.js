@@ -1,48 +1,33 @@
-let JD_FRUIT_HOST = 'https://api.m.jd.com/client.action?';
-let farmTask = null;
-let farmInfo = null;
+var JD_FRUIT_HOST = 'https://api.m.jd.com/client.action?';
+var farmTask = null;
+var farmInfo = null;
 
-let shareCodes = [
+var timeout = 3;
+var shareCodes = [
 	'121ada81cdfd4085b07d1ce871ded341',
 ]
 
-function request(function_id, body = {}) {
-	console.log(function_id);
-	fetch(JD_FRUIT_HOST + 'functionId=' + function_id + '&appid=wh5&body=' + JSON.stringify(body), {
-			credentials: "include",
-		})
-		.then(res => {
-			return res.json();
-		})
-		.then((response) => {
-			// console.log(response);
-			sleep(response);
-			
-		});
+async function request(function_id, body = {}) {
+	await sleep();
+	return new Promise((resolve, reject)=> {
+		fetch(JD_FRUIT_HOST + 'functionId=' + function_id + '&appid=wh5&body=' + JSON.stringify(body), {
+				credentials: "include",
+			})
+			.then(res => {
+				return res.json();
+			})
+			.then((response) => {
+				resolve(response);
+			});
+	})
+	
 }
 
-function* step() {
-	
-	farmTask = yield taskInitForFarm();
-	console.log('当前任务详情: ' , farmTask);
-	farmInfo = yield initForFarm();
-	console.log('农场初始化数据: ' , farmInfo);
-	
-	if (farmInfo.farmUserPro) {
-		console.log('shareCode为: ' , farmInfo.farmUserPro.shareCode);
-	}else {
-		console.log('初始化农场数据异常, 请登录京东 app查看农场0元水果功能是否正常');
-	}
-	
-	if (!farmTask.signInit.todaySigned) {
-		let signResult = yield signForFarm(); //签到
-		console.log('签到结果: ' , signResult);
-	}
-	
-	
-	
-	// let goalResult = yield gotWaterGoalTaskForFarm();
-	// console.log('被水滴砸中奖励: ', goalResult);
+function *step() {
+	console.log('0元水果任务开始');
+	yield initForFarm();
+	yield taskInitForFarm();
+	yield signForFarm();
 	
 	let adverts = farmTask.gotBrowseTaskAdInit.userBrowseTaskAds
 	for (let advert of adverts) { //开始浏览广告
@@ -58,37 +43,24 @@ function* step() {
 			console.log('领取浏览广告奖励结果: ' , browseRwardResult);
 		}
 	}
-	console.log('所有广告浏览任务结束, 即将开始每日浇水任务');
-	
+	console.log('即将开始每日浇水任务');
 	console.log('当前水滴剩余: ' + farmInfo.farmUserPro.totalEnergy);
+	
+	
 	if (farmTask.totalWaterTaskInit.totalWaterTaskTimes < farmTask.totalWaterTaskInit.totalWaterTaskLimit) {
-		
-		do {
-			console.log('已浇水 ' + farmTask.totalWaterTaskInit.totalWaterTaskTimes + ' 次');
-			let waterResult = yield waterGoodForFarm();
-			console.log('本次浇水结果: ', waterResult);
-			if (waterResult.code != 0) {//异常中断
-				break
-			}
-			farmTask = yield taskInitForFarm();
-		}while (farmTask.totalWaterTaskInit.totalWaterTaskTimes < farmTask.totalWaterTaskInit.totalWaterTaskLimit)
-		
+		yield waterGoodForFarm();
 		//这里还需要领取一下浇水奖励
-		let firstWaterReward = yield firstWaterTaskForFarm();
-		console.log('首次浇水奖励领取结果: ', firstWaterReward);
-		let totalWaterReward = yield totalWaterTaskForFarm();
-		console.log('10次浇水奖励领取结果: ', totalWaterReward);
-		
-		
-		
-		
+		yield firstWaterTaskForFarm();
+		yield totalWaterTaskForFarm();
 	}
 	
 	console.log('finished 水果任务完成!');
+	
+	//这个是集水果换奖励的, 现在app中入口找不到了.....
 	yield browserForTurntableFarm(1);
 	yield browserForTurntableFarm(2);
 	
-	
+	yield masterGotFinishedTaskForFarm();
 	console.log('全部任务结束');
 }
 
@@ -98,7 +70,10 @@ function* step() {
  */
 function lotteryForTurntableFarm() {
 	
-	request(arguments.callee.name.toString(), {type: 1});
+	request(arguments.callee.name.toString(), {type: 1}).then(response=> {
+		console.log(response);
+		Task.next();
+	});
 }
 
 function browserForTurntableFarm(type) {
@@ -109,7 +84,10 @@ function browserForTurntableFarm(type) {
 		console.log('领取浏览爆品会场奖励');
 	}
 	
-	request(arguments.callee.name.toString(), {type: type});
+	request(arguments.callee.name.toString(), {type: type}).then(response=> {
+		console.log(response);
+		Task.next();
+	});
 	// 浏览爆品会场8秒
 }
 
@@ -118,7 +96,10 @@ function browserForTurntableFarm(type) {
  * 要弹出来窗口后调用才有效, 暂时不知道如何控制
  */
 function gotWaterGoalTaskForFarm() {
-	request(arguments.callee.name.toString(), {type: 3});
+	request(arguments.callee.name.toString(), {type: 3}).then(response=> {
+		console.log(response);
+		Task.next();
+	});
 }
 
 /**
@@ -126,27 +107,69 @@ function gotWaterGoalTaskForFarm() {
  */
 function totalWaterTaskForFarm() {
 	let functionId = arguments.callee.name.toString();
-	request(functionId);
+	
+	request(functionId).then(response=> {
+		console.log('10次浇水奖励领取结果: ', response);
+		Task.next();
+	});
+	
 }
 
 
 function firstWaterTaskForFarm() {
 	let functionId = arguments.callee.name.toString();
-	request(functionId);
+	request(functionId).then(response=> {
+		console.log('首次浇水奖励领取结果: ', response);
+		Task.next();
+	});
+	
 }
 
 /**
- * 初始化农场, 可获取果树及用户信息
+ * 初始化农场, 可获取果树及用户信息, 同时传入shareCode可为好友助力
  */
-function initForFarm() {
+async function initForFarm() {
+	console.log('初始化农场信息, 请稍候...');
 	let functionId = arguments.callee.name.toString();
-	request(functionId,  {shareCode: shareCodes[0]});
+	let body = {};
+	if (shareCodes.length) {
+		console.log('有好友需要助力');
+		for (let code of shareCodes) {
+			console.log('开始助力好友: ', code);
+			let response = await request(functionId, {
+				shareCode: code
+			});
+			if (response.code == 0) {
+				console.log(code + ': 助力结果: ', response.helpResult);
+				farmInfo = response;
+			}
+		}
+	}
+	
+	if (farmInfo.farmUserPro) {
+		console.log('当前账号shareCode为: ', farmInfo.farmUserPro.shareCode);
+	}
+	
+	Task.next();
 }
 
 // 浇水动作
-function waterGoodForFarm() {
-	let functionId = arguments.callee.name.toString();
-	request(functionId);
+async function waterGoodForFarm() {
+	
+	do {
+		console.log('已浇水 ' + farmTask.totalWaterTaskInit.totalWaterTaskTimes + ' 次');
+		let waterResult = await request(arguments.callee.name.toString());
+		console.log('本次浇水结果: ', waterResult);
+		if (waterResult.code != 0) {//异常中断
+			break
+		}
+		farmTask = await request('taskInitForFarm');
+		
+	}while (farmTask.totalWaterTaskInit.totalWaterTaskTimes < farmTask.totalWaterTaskInit.totalWaterTaskLimit)
+	
+	setTimeout(function() {
+		Task.next();
+	}, 1000);
 }
 
 /**
@@ -156,33 +179,72 @@ function waterGoodForFarm() {
  */
 function browseAdTaskForFarm(advertId, type) {
 	let functionId = arguments.callee.name.toString();
-	request(functionId, {advertId, type});
+	request(functionId, {advertId, type}).then(response=> {
+		Task.next(response);
+	});
 }
 
 function signForFarm() {
-	let functionId = arguments.callee.name.toString();
-	request(functionId);
+	console.log('准备签到, 请稍候...');
+	
+	if (!farmTask.signInit.todaySigned) {
+		request(arguments.callee.name.toString()).then(response=> {
+			console.log('签到结果: ' , response);
+		});
+	}else {
+		console.log('今天已经签到过了');
+	}
+
+	setTimeout(()=> {
+		Task.next();
+	}, timeout * 1000);
 }
 
 // 初始化任务列表
 function taskInitForFarm() {
+	console.log('任务初始化, 请稍候...');
 	let functionId = arguments.callee.name.toString();
-	request(functionId);
+	request(arguments.callee.name.toString()).then(response=> {
+		if (response.code == 0) {
+			farmTask = response;
+			console.log('任务初始化成功: ', response);
+			Task.next();
+		}else {
+			console.log('任务初始化失败: ', response);
+			Task.return();
+		}
+		
+	});
 }
 
 /**
  * 初始化集卡活动信息
  */
 function initForTurntableFarm() {
-	request(arguments.callee.name.toString());
+	request(arguments.callee.name.toString()).then(response=> {
+		console.log(response);
+		Task.next();
+	});
 }
 
-function sleep(response) {
-	console.log('休息一下');
-	setTimeout(()=> {
-		console.log('休息结束');
-		Task.next(response)
-	}, 2000);
+
+//领取领取额外奖励的动作
+function masterGotFinishedTaskForFarm() {
+	console.log("领取助力人数已满奖励")
+	let functionId = arguments.callee.name.toString();
+	request(arguments.callee.name.toString()).then(response=> {
+		console.log('领取结果: ', response);
+		Task.next();
+	})
+}
+
+function sleep() {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			resolve();
+		}, timeout * 1000);
+	})
+	
 }
 
 

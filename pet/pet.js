@@ -43,7 +43,7 @@ function* entrance() {
 	}
 	
 	yield energyCollect();
-	
+	yield getHelpAddedBonus();
 	console.log('全部任务完成, 如果帮助到您可以点下🌟STAR鼓励我一下, 明天见~');
 }
 
@@ -100,8 +100,7 @@ async function feedReachInit() {
 		console.log('投食任务结束...');
 		gen.next();
 	};
-	
-	
+
 	
 	if (canFeedTimes < needFeedTimes) {
 		if (confirm('当前剩余狗粮' + foodAmount + 'g, 已不足投食' + needFeedTimes + '次, 确定要继续吗?') === false) {
@@ -121,6 +120,15 @@ async function feedReachInit() {
 	
 	
 
+}
+
+function getHelpAddedBonus() {
+	console.log("领取助力人数已满奖励")
+	request(arguments.callee.name.toString()).then(response=> {
+		console.log('领取结果: ', response);
+		gen.next();
+	})
+	
 }
 
 //等待一下
