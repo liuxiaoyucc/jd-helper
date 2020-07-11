@@ -27,7 +27,8 @@ function *step() {
 	console.log('0元水果任务开始');
 	yield initForFarm();
 	yield taskInitForFarm();
-	yield signForFarm();
+	yield signForFarm(); // 签到
+	yield waterRainForFarm(); // 水滴雨, 每天两次, 相隔3个小时才可以进行下一次
 	
 	let adverts = farmTask.gotBrowseTaskAdInit.userBrowseTaskAds
 	for (let advert of adverts) { //开始浏览广告
@@ -184,20 +185,34 @@ function browseAdTaskForFarm(advertId, type) {
 	});
 }
 
+function waterRainForFarm() {
+	console.log('开始水滴雨');
+	request(arguments.callee.name.toString(), {type: 1, hongBaoTimes: 100}).then(response=> { //农场签到改版后的接口
+		console.log('水滴雨结果: ' , response);
+		Task.next();
+	});
+}
+
 function signForFarm() {
 	console.log('准备签到, 请稍候...');
 	
 	if (!farmTask.signInit.todaySigned) {
-		request(arguments.callee.name.toString()).then(response=> {
-			console.log('签到结果: ' , response);
+		
+		
+		request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
+			console.log('新版签到结果: ' , response);
+			Task.next();
 		});
+		
+		// request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
+		// 	console.log('旧版签到结果: ' , response);
+		// });
 	}else {
 		console.log('今天已经签到过了');
+		setTimeout(()=> {
+			Task.next();
+		}, timeout * 1000);
 	}
-
-	setTimeout(()=> {
-		Task.next();
-	}, timeout * 1000);
 }
 
 // 初始化任务列表
