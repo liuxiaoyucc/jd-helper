@@ -216,8 +216,13 @@ async function getBrowseShopsReward() {
 // 浏览指定店铺 任务
 function getSingleShopReward() {
 	console.log('准备浏览指定店铺');
-	request(arguments.callee.name.toString()).then(response=> {
-		console.log('浏览指定店铺结果: ' , response);
+	request(arguments.callee.name.toString()).then(async response=> {
+		console.log('APP 浏览指定店铺结果: ' , response);
+		
+		let browser_result = await request(arguments.callee.name.toString(), {version: 1, index: 1, type: 1});
+		console.log('小程序浏览指定店铺结果: ', browser_result);
+		let get_browser_food_result = await request(arguments.callee.name.toString(), {version: 1, index: 1, type: 2});
+		console.log('领取小程序浏览指定店铺奖励: ', get_browser_food_result);
 		gen.next();
 	})
 }
