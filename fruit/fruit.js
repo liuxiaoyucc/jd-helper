@@ -208,23 +208,30 @@ function clockInInitForFarm() {
 function signForFarm() {
 	console.log('准备签到, 请稍候...');
 	
-	if (!farmTask.signInit.todaySigned || !clockInfo.todaySigned) {
+	//先不进行验证是否签到, 直接调用接口
+	request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
+		console.log('新版签到结果: ' , response);
+		Task.next();
+	});
+	
+	
+	// if (!farmTask.signInit.todaySigned || !clockInfo.todaySigned) {
 		
-		request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
-			console.log('旧版签到结果: ' , response);
-		});
+	// 	request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
+	// 		console.log('旧版签到结果: ' , response);
+	// 	});
 		
-		request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
-			console.log('新版签到结果: ' , response);
-			Task.next();
-		});
+	// 	request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
+	// 		console.log('新版签到结果: ' , response);
+	// 		Task.next();
+	// 	});
 		
-	}else {
-		console.log('今天已经签到过了');
-		setTimeout(()=> {
-			Task.next();
-		}, timeout * 1000);
-	}
+	// }else {
+	// 	console.log('今天已经签到过了');
+	// 	setTimeout(()=> {
+	// 		Task.next();
+	// 	}, timeout * 1000);
+	// }
 }
 
 // 初始化任务列表
