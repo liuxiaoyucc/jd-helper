@@ -1,6 +1,7 @@
 var JD_FRUIT_HOST = 'https://api.m.jd.com/client.action?';
 var farmTask = null;
 var farmInfo = null;
+var clockInfo = null;
 
 var timeout = 3;
 var shareCodes = [
@@ -27,6 +28,7 @@ function *step() {
 	console.log('0元水果任务开始');
 	yield initForFarm();
 	yield taskInitForFarm();
+	yield clockInInitForFarm();
 	yield signForFarm(); // 签到
 	yield waterRainForFarm(); // 水滴雨, 每天两次, 相隔3个小时才可以进行下一次
 	
@@ -193,20 +195,30 @@ function waterRainForFarm() {
 	});
 }
 
+function clockInInitForFarm() {
+	console.log('初始化新版签到信息');
+	var timestamp = new Date().getTime();
+	request(arguments.callee.name.toString(), {timestamp: timestamp, channel: 2}).then(response=> { //农场签到改版后的接口
+		console.log('初始化新版签到结果: ' , response);
+		clockInfo = response;
+		Task.next();
+	});
+}
+
 function signForFarm() {
 	console.log('准备签到, 请稍候...');
 	
-	if (!farmTask.signInit.todaySigned) {
+	if (!farmTask.signInit.todaySigned || !clockInfo.todaySigned) {
 		
+		request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
+			console.log('旧版签到结果: ' , response);
+		});
 		
 		request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
 			console.log('新版签到结果: ' , response);
 			Task.next();
 		});
 		
-		// request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
-		// 	console.log('旧版签到结果: ' , response);
-		// });
 	}else {
 		console.log('今天已经签到过了');
 		setTimeout(()=> {
