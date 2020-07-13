@@ -205,33 +205,18 @@ function clockInInitForFarm() {
 	});
 }
 
-function signForFarm() {
+async function signForFarm() {
 	console.log('准备签到, 请稍候...');
 	
-	//先不进行验证是否签到, 直接调用接口
-	request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
-		console.log('新版签到结果: ' , response);
+	let old_sign_result = await request(arguments.callee.name.toString());
+	let new_sign_result = await request('clockInForFarm', {type: 1});
+	console.log('旧版签到结果: ' , old_sign_result);
+	console.log('新版签到结果: ' , new_sign_result);
+	
+	setTimeout(()=> {
 		Task.next();
-	});
+	}, timeout * 1000);
 	
-	
-	// if (!farmTask.signInit.todaySigned || !clockInfo.todaySigned) {
-		
-	// 	request(arguments.callee.name.toString()).then(response=> { //旧版签到接口, 暂时留着, 因为不知道是不是所有用户签到都更新了
-	// 		console.log('旧版签到结果: ' , response);
-	// 	});
-		
-	// 	request('clockInForFarm', {type: 1}).then(response=> { //农场签到改版后的接口
-	// 		console.log('新版签到结果: ' , response);
-	// 		Task.next();
-	// 	});
-		
-	// }else {
-	// 	console.log('今天已经签到过了');
-	// 	setTimeout(()=> {
-	// 		Task.next();
-	// 	}, timeout * 1000);
-	// }
 }
 
 // 初始化任务列表
