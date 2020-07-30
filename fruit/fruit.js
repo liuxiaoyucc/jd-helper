@@ -30,6 +30,7 @@ function *step() {
 	yield taskInitForFarm();
 	yield clockInInitForFarm();
 	yield signForFarm(); // 签到
+	
 	yield waterRainForFarm(); // 水滴雨, 每天两次, 相隔3个小时才可以进行下一次
 	
 	let adverts = farmTask.gotBrowseTaskAdInit.userBrowseTaskAds
