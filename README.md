@@ -1,4 +1,4 @@
-# jd-helper
+# jd-helper[暂停更新]
 
 京东日常小助手, 省时省力
 
